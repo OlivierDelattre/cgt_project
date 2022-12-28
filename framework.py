@@ -11,23 +11,89 @@ r = 0.5         # If minimum is not met: All group participants lose their endow
                 #   with probability r
                 # If minimum is met: individuals retain their endowments
 
+def theta(x): return 0 if x < 0 else 1
 
 #### -----------------------------------------------------------------------------------------------------------
 #### ---- Adapted from https://github.com/Socrats/EGTTools/blob/stable/src/egttools/games/informal_risk.py -----
 #### -----------------------------------------------------------------------------------------------------------
 class CRDWithExecutor(egt.games.AbstractGame):
-    def __init__(self, strategies: list, group_size: int, cost: float, alpha: float):
-        self.group_size = group_size
-        self.cost = cost
+    def __init__(self, strategies: list, initial_endowment, group_size: int, cost: float, risk:float, 
+                alpha: float, cooperation_threshold: int, enhancement_factor:float, pi_t, pi_e, 
+                incentive:tuple=('local', 'fixed')):
+        self.N = group_size
+        self.c = cost
+        self.r = risk
         self.alpha = alpha
+        self.b = initial_endowment
+        self.M = cooperation_threshold
+        self.pi_t = pi_t
+        self.pi_e = pi_e
+        self.delta = enhancement_factor
+
         self.strategies_ = strategies
         self.nb_strategies_ = len(strategies)
+        indices = np.argsort([s.type() for s in strategies])
+        self.ci, self.di, self.ei = indices # Indices of Cooperator, Defector and Executor
+        
+        assert(len(incentive) == 2)
+        assert(incentive[0] in ['global', 'local'])
+        assert(incentive[1] in ['fixed', 'flexible'])
+
+        self.incentive = incentive
+
         self.nb_states_ = egt.calculate_nb_states(self.group_size, self.nb_strategies_)
         self.payoffs_ = np.zeros(shape=(self.nb_strategies_, self.nb_states_), dtype=np.float64)
         self.calculate_payoffs() # This updates the array above
 
-    def play(self, group_composition: list(int), game_payoffs: list(float)) -> None:
-        raise NotImplementedError
+    
+    # PI'D(jc) on page 11
+    def base_defector_payoff(self, jc):
+        return self.b * theta(jc - self.M) +\
+                (1 - self.r)*self.b*(1 - theta(jc - self.M))
+
+    def DELTA(self, group_composition:list):
+        if self.incentive[0] == 'local':
+            delta = 0 # TODO implement
+            raise NotImplementedError
+        else:
+            delta = 0 # TODO implement
+            raise NotImplementedError
+        return delta
+
+    # Fixed incentive payoff page 12
+    def fixed_incentive_payoffs(self, group_composition: list):
+        jc = group_composition[self.ci]
+        jd = group_composition[self.di]
+        je = group_composition[self.ei]
+        PI_prime_D = self.base_defector_payoff(jc+je)
+
+        PI_D = PI_prime_D - (1 - self.alpha)*self.pi_e*self.DELTA(group_composition)
+        PI_C = PI_prime_D + self.alpha*self.pi_e*self.DELTA(group_composition) - self.c
+        PI_E = PI_prime_D + self.alpha*self.pi_e*self.DELTA(group_composition) - self.c - self.pi_t
+
+        return (PI_C, PI_D, PI_E)
+
+    # Flexible incentive payoff page 12
+    def flexible_incentive_payoffs(self, group_composition: list):
+        jc = group_composition[self.ci]
+        jd = group_composition[self.di]
+        je = group_composition[self.ei]
+        PI_prime_D = self.base_defector_payoff(jc+je)
+
+        PI_D = PI_prime_D - (1 - self.alpha)*((self.pi_t*self.delta*je)/(self.N - jc - je))*self.DELTA(group_composition)
+        PI_C = PI_prime_D + self.alpha*((self.pi_t*self.delta*je)/(jc + je))*self.DELTA(group_composition) - self.c
+        PI_E = PI_prime_D + self.alpha*((self.pi_t*self.delta*je)/(jc + je))*self.DELTA(group_composition) - self.c - self.pi_t
+
+        return (PI_C, PI_D, PI_E)
+        
+    def play(self, group_composition: list(int), game_payoffs: list) -> None:
+        jc = group_composition[self.ci]
+        jd = group_composition[self.di]
+        je = group_composition[self.ei]
+        
+        # Flexible incentives (page 12)
+        pi_D = 
+        # Fixed incentives (page 12)
 
     def calculate_payoffs(self) -> np.ndarray:
         raise NotImplementedError
@@ -38,7 +104,7 @@ class CRDWithExecutor(egt.games.AbstractGame):
     def payoffs(self)->np.ndarray:
         return self.payoffs_
 
-    def payoff(self, strategy: int, group_composition: list(np.uint64))->float:
+    def payoff(self, strategy: int, group_composition: list)->float:
         raise NotImplementedError
 
     def save_payoffs(self, file_name:str)->None:
@@ -58,9 +124,7 @@ class CRDWithExecutor(egt.games.AbstractGame):
         return f"CRDWithExecutor_{self.group_size}_{self.cost}"
 
     def type(self)->str:
-        "CRDWithExecutor"
-
-    pass
+        return "CRDWithExecutor"
 
 class Cooperator(egt.behaviors.CRD.AbstractCRDStrategy):
     def __init__(self, c, b):
