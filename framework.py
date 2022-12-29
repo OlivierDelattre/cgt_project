@@ -18,22 +18,23 @@ def theta(x): return 0 if x < 0 else 1
 #### -----------------------------------------------------------------------------------------------------------
 class CRDWithExecutor(egt.games.AbstractGame):
     def __init__(self, strategies: list, initial_endowment, group_size: int, cost: float, risk:float, 
-                alpha: float, cooperation_threshold: int, enhancement_factor:float, pi_t, pi_e, 
+                alpha: float, cooperation_threshold: int, enhancement_factor:float, pi_t: float, pi_e: float, n_e: int,
                 incentive:tuple=('local', 'fixed')):
-        self.N = group_size
-        self.c = cost
-        self.r = risk
-        self.alpha = alpha
-        self.b = initial_endowment
-        self.M = cooperation_threshold
-        self.pi_t = pi_t
-        self.pi_e = pi_e
-        self.delta = enhancement_factor
+        self.N = group_size                     # Size of groups
+        self.c = cost                           # Cost of cooperating
+        self.r = risk                           # Risk of losing everything if num cooperators is not reached
+        self.alpha = alpha                      # Positive/Negative incentive trade-off
+        self.b = initial_endowment              # Initial funds of each individual
+        self.M = cooperation_threshold          # Number of cooperators needed for success
+        self.pi_t = pi_t                        # Cost of contributing to sanction pool
+        self.pi_e = pi_e                        # Support from Executors?
+        self.n_e = n_e
+        self.delta = enhancement_factor         # Enhancement_factor?
 
-        self.strategies_ = strategies
-        self.nb_strategies_ = len(strategies)
+        self.strategies_ = strategies           # List of strategies
+        self.nb_strategies_ = len(strategies)   # Number of strategies
         indices = np.argsort([s.type() for s in strategies])
-        self.ci, self.di, self.ei = indices # Indices of Cooperator, Defector and Executor
+        self.ci, self.di, self.ei = indices     # Indices of Cooperator, Defector and Executor in strategy list
         
         assert(len(incentive) == 2)
         assert(incentive[0] in ['global', 'local'])
@@ -52,12 +53,12 @@ class CRDWithExecutor(egt.games.AbstractGame):
                 (1 - self.r)*self.b*(1 - theta(jc - self.M))
 
     def DELTA(self, group_composition:list):
+        je = group_composition[self.ei]
         if self.incentive[0] == 'local':
-            delta = 0 # TODO implement
-            raise NotImplementedError
+            delta = theta(je - self.ne)
         else:
-            delta = 0 # TODO implement
-            raise NotImplementedError
+            # TODO Somehow get access to population_state for i_e
+            delta = 0 # TODO  theta(ie - self.ne)
         return delta
 
     # Fixed incentive payoff page 12
@@ -91,12 +92,26 @@ class CRDWithExecutor(egt.games.AbstractGame):
         jd = group_composition[self.di]
         je = group_composition[self.ei]
         
-        # Flexible incentives (page 12)
-        pi_D = 
-        # Fixed incentives (page 12)
+        #f_D = 
+        #f_C = 
+        #f_E =
+        raise NotImplementedError 
 
-    def calculate_payoffs(self) -> np.ndarray:
-        raise NotImplementedError
+    def calculate_payoffs(self) -> np.ndarray:  # Array of shape (nb_strategies, nb_states_)
+        payoffs = np.zeros((self.nb_strategies_, self.nb_states_))
+        nb_states_ = egt.calculate_nb_states(self.N, self.nb_strategies_)
+        for i in range(nb_states_):
+            group_composition = egt.sample_simplex(i, self.N, self.nb_strategies_)
+            if self.incentive[1] == 'fixed':
+                PI_C, PI_D, PI_E = self.fixed_incentive_payoffs(group_composition)
+            else:
+                PI_C, PI_D, PI_E = self.flexible_incentive_payoffs(group_composition)
+            payoffs[self.ci, i] = PI_C
+            payoffs[self.di, i] = PI_D
+            payoffs[self.ei, i] = PI_E
+        self.payoffs_ = payoffs
+
+        return self.payoffs_
 
     def calculate_fitness(self, player_strategy: int, pop_size: int, population_state: np.ndarray) -> float:
         raise NotImplementedError
