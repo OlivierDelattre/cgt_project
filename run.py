@@ -23,7 +23,7 @@ class CRDWithExecutor():
 	#### -----------------------------------------------------------------------------------------------------------
     
     def __init__(self, strategies: list, initial_endowment, population_size: int, group_size: int, cost: float, risk:float, 
-                alpha: float, cooperation_threshold: int, enhancement_factor:float, pi_t: float, pi_e: float, n_e: int, mu: int, incentive:str="fixed"):
+                alpha: float, cooperation_threshold: int, enhancement_factor:float, pi_t: float, pi_e: float, n_e: int, mu: int, incentive:tuple=('local', 'fixed')):
 
         self.N = group_size                     # Size of groups
         self.Z = population_size                # Size of population
@@ -56,10 +56,7 @@ class CRDWithExecutor():
 
     def Delta(self, je):
 
-        #delta = 0
-        #elif self.ie > self.Z * 0.25
-
-        if je > self.N * 0.25:
+        if self.incentive[0] == 'local':
             delta = theta(je - self.n_e)
         else:
             delta = theta(self.ie - self.n_e)
@@ -77,10 +74,10 @@ class CRDWithExecutor():
     # fixed incentive 
 
     def defector_fixed_incentives_payoff(self, jc, je):
-        return self.base_defector_payoff(jc+je) - (1 - self.alpha)*self.pi_e*self.Delta(je)
+        return self.base_defector_payoff(jc+je) - ((1 - self.alpha)*self.pi_e*self.Delta(je))
 
     def cooperator_fixed_incentives_payoff(self, jc, je):
-        return self.base_defector_payoff(jc+je) + self.alpha*self.pi_e*self.Delta(je) - self.c
+        return self.base_defector_payoff(jc+je) + (self.alpha*self.pi_e*self.Delta(je)) - self.c
 
     def executor_fixed_incentives_payoff(self, jc, je):
         return self.cooperator_fixed_incentives_payoff(jc, je) - self.pi_t
@@ -146,23 +143,40 @@ class CRDWithExecutor():
         return fe
 
     def calculate_payoffs(self) -> np.ndarray:
+        
         nb_states_ = egt.calculate_nb_states(self.N, self.nb_strategies_)
         payoffs = np.zeros((self.nb_strategies_, nb_states_))
+        
         for i in range(nb_states_):
+            
             group_composition = egt.sample_simplex(i, self.N, self.nb_strategies_)
             jc = group_composition[2]
             je = group_composition[1]
-            if self.incentive == 'fixed':
+
+            if self.incentive[1] == 'fixed':
+                
                 PI_D = self.defector_fixed_incentives_payoff(jc, je)
                 PI_E = self.executor_fixed_incentives_payoff(jc, je)
                 PI_C = self.cooperator_fixed_incentives_payoff(jc, je)
+
+                #PI_D = self.defector_average_payoffs_fixed()
+                #PI_E = self.executor_average_payoffs_fixed()
+                #PI_C = self.cooperator_average_payoffs_fixed()
+
             else:
+                
                 PI_D = self.defector_flexible_incentives_payoff(jc, je)
                 PI_E = self.executor_flexible_incentives_payoff(jc, je)
                 PI_C = self.cooperator_flexible_incentives_payoff(jc, je)
+
+                #PI_D = self.defector_average_payoffs_flexible()
+                #PI_E = self.executor_average_payoffs_flexible()
+                #PI_C = self.cooperator_average_payoffs_flexible()
+           
             payoffs[0, i] = PI_D
             payoffs[1, i] = PI_E
             payoffs[2, i] = PI_C
+        
         self.payoffs_ = payoffs
 
         return self.payoffs_
@@ -302,17 +316,17 @@ if __name__ == '__main__':
 
     Z  = 100         # Population size
     N  = 4           # Group size
-    b  = 1           # Endowment (individual's money/funds/...)
+    b  = 1.           # Endowment (individual's money/funds/...)
     c  = 0.1         # Amount of money individuals contribute
-    Mc = 0.5         # Minimum collective contribution
-    M  = 3           # OR Minimum number of cooperators
+    Mc = 0.3         # Minimum collective contribution
+    M  = 3.           # OR Minimum number of cooperators
     r  = 0.2         # If minimum is not met: All group participants lose their endowment with probability r, else: individuals retain their endowments
     pi_t = 0.03
     pi_e = 0.3
     n_e = 0.25
-    alpha = 0
+    alpha = 1.
     mu    = 1/Z
-    beta = 5
+    beta = 5.
 
     strategy_labels = ["Defector", "Executor", "Cooperator"]
 
@@ -336,7 +350,7 @@ if __name__ == '__main__':
     v = np.asarray(xy_to_barycentric_coordinates(simplex.X, simplex.Y, simplex.corners))
     v_int = np.floor(v * Z).astype(np.int64)
 
-    evolver = egt.analytical.StochDynamics(3, payoffs, Z)
+    evolver = egt.analytical.StochDynamics(3, payoffs, Z, N, mu)
 
     result = np.asarray([[evolver.full_gradient_selection(v_int[:, i, j], beta) for j in range(v_int.shape[2])] for i in range(v_int.shape[1])]).swapaxes(0, 1).swapaxes(0, 2)
     xy_results = vectorized_barycentric_to_xy_coordinates(result, simplex.corners)
@@ -346,7 +360,7 @@ if __name__ == '__main__':
 
     calculate_gradients = lambda u: Z*evolver.full_gradient_selection(u, beta)
     roots = find_roots_in_discrete_barycentric_coordinates(calculate_gradients, Z, nb_interior_points=5151, atol=1e-1)
-    roots_xy = [barycentric_to_xy_coordinates(x, simplex.corners) for x in roots]
+    #roots_xy = [barycentric_to_xy_coordinates(x, simplex.corners) for x in roots]
     stability = calculate_stability(roots, calculate_gradients)
 
     evolver.mu = 1/Z
@@ -357,8 +371,8 @@ if __name__ == '__main__':
     plot = (simplex.add_axis(ax=ax) 
         .apply_simplex_boundaries_to_gradients(Ux, Uy)
         .draw_gradients(zorder=5)
-        .add_colorbar()
-        .draw_stationary_points(roots_xy, stability, zorder=11)
+        #.add_colorbar()
+        #.draw_stationary_points(roots_xy, stability, zorder=11)
         .add_vertex_labels(strategy_labels)
         .draw_stationary_distribution(sd, vmax=0.0001, alpha=0.5, edgecolors='gray',cmap='binary', shading='gouraud', zorder=0)
         .draw_trajectory_from_roots(lambda u, t: Z*evolver.full_gradient_selection_without_mutation(u, beta),
