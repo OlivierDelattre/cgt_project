@@ -16,7 +16,7 @@ def theta(x): return 0 if x < 0 else 1
 #### -----------------------------------------------------------------------------------------------------------
 #### ---- Adapted from https://github.com/Socrats/EGTTools/blob/stable/src/egttools/games/informal_risk.py -----
 #### -----------------------------------------------------------------------------------------------------------
-class CRDWithExecutor(egt.games.AbstractGame):
+class CRDWithExecutor():
     def __init__(self, strategies: list, initial_endowment, group_size: int, cost: float, risk:float, 
                 alpha: float, cooperation_threshold: int, enhancement_factor:float, pi_t: float, pi_e: float, n_e: int,
                 incentive:tuple=('local', 'fixed')):
@@ -42,7 +42,7 @@ class CRDWithExecutor(egt.games.AbstractGame):
 
         self.incentive = incentive
 
-        self.nb_states_ = egt.calculate_nb_states(self.group_size, self.nb_strategies_)
+        self.nb_states_ = egt.calculate_nb_states(self.N, self.nb_strategies_)
         self.payoffs_ = np.zeros(shape=(self.nb_strategies_, self.nb_states_), dtype=np.float64)
         self.calculate_payoffs() # This updates the array above
 
@@ -55,10 +55,10 @@ class CRDWithExecutor(egt.games.AbstractGame):
     def DELTA(self, group_composition:list):
         je = group_composition[self.ei]
         if self.incentive[0] == 'local':
-            delta = theta(je - self.ne)
+            delta = theta(je - self.n_e)
         else:
             # TODO Somehow get access to population_state for i_e
-            delta = 0 # TODO  theta(ie - self.ne)
+            delta = 0 # TODO  theta(ie - self.n_e)
         return delta
 
     # Fixed incentive payoff page 12
@@ -87,7 +87,7 @@ class CRDWithExecutor(egt.games.AbstractGame):
 
         return (PI_C, PI_D, PI_E)
         
-    def play(self, group_composition: list(int), game_payoffs: list) -> None:
+    def play(self, group_composition: list, game_payoffs: list) -> None:
         jc = group_composition[self.ci]
         jd = group_composition[self.di]
         je = group_composition[self.ei]
@@ -141,7 +141,7 @@ class CRDWithExecutor(egt.games.AbstractGame):
     def type(self)->str:
         return "CRDWithExecutor"
 
-class Cooperator(egt.behaviors.CRD.AbstractCRDStrategy):
+class Cooperator():
     def __init__(self, c, b):
         self.c = c
         self.endowment = b
@@ -153,7 +153,7 @@ class Cooperator(egt.behaviors.CRD.AbstractCRDStrategy):
     def type(self):
         return "Cooperator"
 
-class Defector(egt.behaviors.CRD.AbstractCRDStrategy):
+class Defector():
     def __init__(self, c, b):
         self.c = c
         self.endowment = b
@@ -165,7 +165,7 @@ class Defector(egt.behaviors.CRD.AbstractCRDStrategy):
     def type(self):
         return "Defector"
 
-class Executor(egt.behaviors.CRD.AbstractCRDStrategy):
+class Executor():
     def __init__(self, c, b, pi_t, pi_e, alpha):
         self.c = c
         self.endowment = b
@@ -178,8 +178,3 @@ class Executor(egt.behaviors.CRD.AbstractCRDStrategy):
 
     def type(self):
         return "Executor"
-
-strategies = [
-    egt.behaviors.NormalForm.CRD.TwoActions.Defector,
-    egt.behaviors.NormalForm.TwoActions.Cooperator,
-]
