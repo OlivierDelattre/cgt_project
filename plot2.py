@@ -7,7 +7,7 @@ from run import CRDWithExecutor, Cooperator, Defector, Executor
 
 if __name__ == '__main__': 
 
-    Z  = 10         # Population size
+    Z  = 10#0        # Population size
     N  = 4           # Group size
     b  = 1           # Endowment (individual's money/funds/...)
     c  = 0.1         # Amount of money individuals contribute
@@ -47,10 +47,10 @@ if __name__ == '__main__':
         mu=game.mu)
 
     print(payoffs)
-    transition_matrix = evolver.calculate_full_transition_matrix(beta=beta)
-    #stationary_distribution = evolver.calculate_stationary_distribution(beta=beta)
+    #transition_matrix = evolver.calculate_full_transition_matrix(beta=beta)
+    stationary_distribution = evolver.calculate_stationary_distribution(beta=beta)
 
-    print(transition_matrix)
+    #print(transition_matrix)
 
     group_achievement = sum([
         stationary_distribution[0]*game.aG(i) for i in range(len(stationary_distribution))
