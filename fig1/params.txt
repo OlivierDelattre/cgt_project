@@ -1,0 +1,17 @@
+Z  = 100         # Population size
+N  = 4           # Group size
+b  = 1           # Endowment (individual's money/funds/...)
+c  = 0.1         # Amount of money individuals contribute
+Mc = 0.5         # Minimum collective contribution
+M  = 3           # OR Minimum number of cooperators
+r  = 0.2         # If minimum is not met: All group participants lose their endowment with probability r, else: individuals retain their endowments
+pi_t = 0.03
+pi_e = 0.3
+n_e = 0.25
+alpha = 0
+mu    = 1/Z
+
+beta = 5                # Selection strength
+transitory = 10**2      # num of steps before we start counting
+nb_generations = 10**4  # num of steps where we do count
+nb_runs = 10            # num of different runs we average over
