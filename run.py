@@ -52,8 +52,11 @@ class CRDWithExecutor():
         self.nb_states_ = egt.calculate_nb_states(self.N, self.nb_strategies_)
         self.payoffs_   = np.zeros(shape=(self.nb_strategies_, self.nb_states_), dtype=np.float64)
 
-    def set_population_state(self, i):
-        self.id, self.ie, self.ic = egt.sample_simplex(i, self.Z, self.nb_strategies_)
+    def set_population_state(self, state):
+        if isinstance(state, (np.ndarray, list)):
+            self.id, self.ie, self.ic = state
+        else:
+            self.id, self.ie, self.ic = egt.sample_simplex(state, self.Z, self.nb_strategies_)
  
     def Delta(self, je):
 
@@ -101,46 +104,58 @@ class CRDWithExecutor():
 
     def defector_average_payoffs_fixed(self):
         fd = 0
+        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
         for jc in range(self.N):
             for je in range(self.N - jc):
-                fd += ((math.comb(self.ic, jc) * math.comb(self.ie, je) * math.comb(self.Z-self.ic-self.ie-1, self.N-1-jc-je)) / math.comb(self.Z-1, self.N-1)) * self.defector_fixed_incentives_payoff(jc, je)
+                fd += ((math.comb(ic, jc) * math.comb(ie, je) * math.comb(self.Z-ic-ie-1, self.N-1-jc-je)) \
+                    / math.comb(self.Z-1, self.N-1)) * self.defector_fixed_incentives_payoff(jc, je)
         return fd
 
     def cooperator_average_payoffs_fixed(self):
         fc = 0
+        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
         for jc in range(self.N):
             for je in range(self.N - jc):
-                fc += ((math.comb(self.ic-1, jc) * math.comb(self.ie, je) * math.comb(self.Z-self.ic-self.ie, self.N-1-jc-je)) / math.comb(self.Z-1, self.N-1)) * self.cooperator_fixed_incentives_payoff(jc+1, je)
+                fc += ((math.comb(ic-1, jc) * math.comb(ie, je) * math.comb(self.Z-ic-ie, self.N-1-jc-je)) \
+                    / math.comb(self.Z-1, self.N-1)) * self.cooperator_fixed_incentives_payoff(jc+1, je)
         return fc
 
     def executor_average_payoffs_fixed(self):
         fe = 0
+        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
         for jc in range(self.N):
             for je in range(self.N - jc):
-                fe += ((math.comb(self.ic, jc) * math.comb(self.ie-1, je) * math.comb(self.Z-self.ic-self.ie, self.N-1-jc-je)) / math.comb(self.Z-1, self.N-1)) * self.executor_fixed_incentives_payoff(jc, je+1)
+                fe += ((math.comb(ic, jc) * math.comb(ie-1, je) * math.comb(self.Z-ic-ie, self.N-1-jc-je)) \
+                    / math.comb(self.Z-1, self.N-1)) * self.executor_fixed_incentives_payoff(jc, je+1)
         return fe
 
     # average payoffs flexible
 
     def defector_average_payoffs_flexible(self):
         fd = 0
+        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
         for jc in range(self.N):
             for je in range(self.N - jc):
-                fd += ((math.comb(self.ic, jc) * math.comb(self.ie, je) * math.comb(self.Z-self.ic-self.ie-1, self.N-1-jc-je)) / math.comb(self.Z-1, self.N-1)) * self.defector_flexible_incentives_payoff(jc, je)
+                fd += ((math.comb(ic, jc) * math.comb(ie, je) * math.comb(self.Z-ic-ie-1, self.N-1-jc-je)) \
+                    / math.comb(self.Z-1, self.N-1)) * self.defector_flexible_incentives_payoff(jc, je)
         return fd 
 
     def cooperator_average_payoffs_flexible(self):
         fc = 0
+        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
         for jc in range(self.N):
     	    for je in range(self.N - jc):
-                fc += ((math.comb(self.ic-1, jc) * math.comb(self.ie, je) * math.comb(self.Z-self.ic-self.ie, self.N-1-jc-je)) / math.comb(self.Z-1, self.N-1)) * self.cooperator_flexible_incentives_payoff(jc+1, je)
+                fc += ((math.comb(ic-1, jc) * math.comb(ie, je) * math.comb(self.Z-ic-ie, self.N-1-jc-je)) \
+                    / math.comb(self.Z-1, self.N-1)) * self.cooperator_flexible_incentives_payoff(jc+1, je)
         return fc
 
     def executor_average_payoffs_flexible(self):
         fe = 0
+        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
         for jc in range(self.N):
             for je in range(self.N - jc):
-                fe += ((math.comb(self.ic, jc) * math.comb(self.ie-1, je) * math.comb(self.Z-self.ic-self.ie, self.N-1-jc-je)) / math.comb(self.Z-1, self.N-1)) * self.executor_flexible_incentives_payoff(jc, je+1)
+                fe += ((math.comb(ic, jc) * math.comb(ie-1, je) * math.comb(self.Z-ic-ie, self.N-1-jc-je)) \
+                    / math.comb(self.Z-1, self.N-1)) * self.executor_flexible_incentives_payoff(jc, je+1)
         return fe
 
     # Get right payoff function depending on which incentive strategy is used
@@ -225,8 +240,8 @@ class CRDWithExecutor():
 #        return self.payoffs_
 
     def T(self, L, R, pop_idx):
+        self.set_population_state(pop_idx)
         pop = egt.sample_simplex(pop_idx, self.Z, self.nb_strategies_)
-        self.id, self.ie, self.ic = pop
         f_L = self.payoffs_[L]
         f_R = self.payoffs_[R]
         i_L = pop[L]
