@@ -275,8 +275,8 @@ class CRDWithExecutor():
         total = 0
         ic, ie = self.ic, self.ie
         #ic, ie = self.ic, self.ie
-        for jc in range(self.N):
-            for je in range(self.N - jc):        
+        for jc in range(self.N + 1):
+            for je in range(self.N - jc + 1):        
                 total += math.comb(ic, jc)*math.comb(ie, je)*math.comb(int(self.Z-ic-ie), self.N-jc-je)*theta(jc + je - self.M)
         total *= (1/math.comb(self.Z, self.N))
         return total
