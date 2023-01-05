@@ -90,7 +90,7 @@ if __name__ == '__main__':
     pi_t = 0.03
     pi_e = 0.3
     n_e = 0.25
-    alpha = 1
+    alpha = 0
     mu    = 1/Z
 
     beta = 5   # Selection strength
@@ -122,5 +122,5 @@ if __name__ == '__main__':
         Z=Z,
     )
 
-    with open("dump.pickle", 'wb') as f:
+    with open(f"alpha={alpha}.pickle", 'wb') as f:
         pickle.dump(sd, f)
