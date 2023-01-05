@@ -59,7 +59,7 @@ if __name__ == '__main__':
     #print(transition_matrix)
 
     group_achievement = sum([
-        stationary_distribution[0]*game.aG(i) for i in range(len(stationary_distribution))
+        stationary_distribution[i]*game.aG(i) for i in range(len(stationary_distribution))
     ])
 
     print(group_achievement)
