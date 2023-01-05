@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 #import seaborn as sns
 
-from egttools.plotting.simplified import plot_replicator_dynamics_in_simplex, plot_pairwise_comparison_rule_dynamics_in_simplex_without_roots
+from egttools.plotting.simplified import plot_replicator_dynamics_in_simplex#, plot_pairwise_comparison_rule_dynamics_in_simplex_without_roots
 from egttools.plotting.helpers    import (xy_to_barycentric_coordinates, barycentric_to_xy_coordinates, find_roots_in_discrete_barycentric_coordinates, calculate_stability)
 from egttools.analytical.utils    import (find_roots, check_replicator_stability_pairwise_games)
 from egttools.helpers.vectorized  import vectorized_replicator_equation, vectorized_barycentric_to_xy_coordinates
@@ -52,7 +52,9 @@ class CRDWithExecutor():
         self.nb_states_ = egt.calculate_nb_states(self.N, self.nb_strategies_)
         self.payoffs_   = np.zeros(shape=(self.nb_strategies_, self.nb_states_), dtype=np.float64)
 
-
+    def set_population_state(self, i):
+        self.id, self.ie, self.ic = egt.sample_simplex(i, self.Z, self.nb_strategies_)
+ 
     def Delta(self, je):
 
         if self.incentive[0] == 'local':
@@ -141,6 +143,25 @@ class CRDWithExecutor():
                 fe += ((math.comb(self.ic, jc) * math.comb(self.ie-1, je) * math.comb(self.Z-self.ic-self.ie, self.N-1-jc-je)) / math.comb(self.Z-1, self.N-1)) * self.executor_flexible_incentives_payoff(jc, je+1)
         return fe
 
+    # Get right payoff function depending on which incentive strategy is used
+    def defector_average_payoffs(self):
+        if self.incentive[1] == 'fixed':
+            return self.defector_average_payoffs_fixed()
+        else:
+            return self.defector_average_payoffs_flexible()
+
+    def cooperator_average_payoffs(self):
+        if self.incentive[1] == 'fixed':
+            return self.cooperator_average_payoffs_fixed()
+        else:
+            return self.cooperator_average_payoffs_flexible()
+
+    def executor_average_payoffs(self):
+        if self.incentive[1] == 'fixed':
+            return self.executor_average_payoffs_fixed()
+        else:
+            return self.executor_average_payoffs_flexible()
+
     def calculate_payoffs(self) -> np.ndarray:
         
         nb_states_ = egt.calculate_nb_states(self.N, self.nb_strategies_)
@@ -153,7 +174,6 @@ class CRDWithExecutor():
             je = group_composition[1]
 
             if self.incentive[1] == 'fixed':
-                
                 PI_D = self.defector_fixed_incentives_payoff(jc, je)
                 PI_E = self.executor_fixed_incentives_payoff(jc, je)
                 PI_C = self.cooperator_fixed_incentives_payoff(jc, je)
@@ -204,28 +224,25 @@ class CRDWithExecutor():
 #
 #        return self.payoffs_
 
-    def T(self, L, R):
+    def T(self, L, R, pop_idx):
+        pop = egt.sample_simplex(pop_idx, self.Z, self.nb_strategies_)
+        self.id, self.ie, self.ic = pop
         f_L = self.payoffs_[L]
         f_R = self.payoffs_[R]
+        i_L = pop[L]
+        i_R = pop[R]
         if(L == 0):
-            i_L = self.id
-            f_L = self.defector_average_payoffs_fixed()
+            f_L = self.defector_average_payoffs()
         elif(L == 1):
-            i_L = self.ie
-            f_L = self.executor_average_payoffs_fixed()
+            f_L = self.executor_average_payoffs()
         else:
-            i_L = self.ic
-            f_L = self.cooperator_average_payoffs_fixed()
-        
+            f_L = self.cooperator_average_payoffs()
         if(R == 0):
-            i_R = self.id
-            f_R = self.defector_average_payoffs_fixed()
+            f_R = self.defector_average_payoffs()
         elif(R == 1):
-            i_R = self.ie
-            f_R = self.executor_average_payoffs_fixed()
+            f_R = self.executor_average_payoffs()
         else:
-            i_R = self.ic
-            f_R = self.cooperator_average_payoffs_fixed()
+            f_R = self.cooperator_average_payoffs()
         
         return (1 - self.mu)*(i_L/self.Z)*(i_R/(self.Z-1))*(1 + math.e**(-self.beta*(f_R - f_L)))**-1 + self.mu*(i_L/(2*self.Z))
 
@@ -239,9 +256,9 @@ class CRDWithExecutor():
         return self.T(1, 2) + self.T(1, 0)
 
     def aG(self, i):
-        pop = egt.sample_simplex(i, self.Z, self.nb_strategies_)
+        self.set_population_state(i)
         total = 0
-        ic, ie = int(pop[2]), int(pop[1])
+        ic, ie = self.ic, self.ie
         #ic, ie = self.ic, self.ie
         for jc in range(self.N):
             for je in range(self.N - jc):        

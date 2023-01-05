@@ -7,18 +7,19 @@ from run import CRDWithExecutor, Cooperator, Defector, Executor
 
 if __name__ == '__main__': 
 
-    Z  = 10#0        # Population size
+    Z = 100         # Population size
     N  = 4           # Group size
-    b  = 1           # Endowment (individual's money/funds/...)
+    b  = 1.           # Endowment (individual's money/funds/...)
     c  = 0.1         # Amount of money individuals contribute
-    Mc = 0.5         # Minimum collective contribution
-    M  = 3           # OR Minimum number of cooperators
+    Mc = 0.3         # Minimum collective contribution
+    M  = 3.           # OR Minimum number of cooperators
     r  = 0.2         # If minimum is not met: All group participants lose their endowment with probability r, else: individuals retain their endowments
     pi_t = 0.03
     pi_e = 0.3
     n_e = 0.25
-    alpha = 1
+    alpha = 1.
     mu    = 1/Z
+    beta = 5.
 
     game = CRDWithExecutor(
         strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],
@@ -46,9 +47,14 @@ if __name__ == '__main__':
         group_size=game.N, 
         mu=game.mu)
 
-    print(payoffs)
+    for i in range(egt.calculate_nb_states(4, 3)):
+        print(egt.sample_simplex(i, 4, 3), " -> ", payoffs.transpose()[i])
+        
     #transition_matrix = evolver.calculate_full_transition_matrix(beta=beta)
+
+    #incredibly slow + bugged in egttools 1.11
     stationary_distribution = evolver.calculate_stationary_distribution(beta=beta)
+
 
     #print(transition_matrix)
 
