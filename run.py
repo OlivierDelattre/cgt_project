@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 #import seaborn as sns
 
-
-from egttools.plotting.simplified import plot_replicator_dynamics_in_simplex
+from egttools.plotting.simplified import plot_replicator_dynamics_in_simplex, plot_pairwise_comparison_rule_dynamics_in_simplex_without_roots
 from egttools.plotting.helpers    import (xy_to_barycentric_coordinates, barycentric_to_xy_coordinates, find_roots_in_discrete_barycentric_coordinates, calculate_stability)
 from egttools.analytical.utils    import (find_roots, check_replicator_stability_pairwise_games)
 from egttools.helpers.vectorized  import vectorized_replicator_equation, vectorized_barycentric_to_xy_coordinates
@@ -324,7 +323,7 @@ if __name__ == '__main__':
     pi_t = 0.03
     pi_e = 0.3
     n_e = 0.25
-    alpha = 1.
+    alpha = 0.
     mu    = 1/Z
     beta = 5.
 
@@ -346,42 +345,27 @@ if __name__ == '__main__':
 
     payoffs = game.calculate_payoffs()
 
+    fig, ax = plt.subplots(figsize=(15,10))
+
     simplex = egt.plotting.Simplex2D(discrete=True, size=Z, nb_points=Z+1)
+    evolver = egt.analytical.StochDynamics(3, payoffs, Z, N, mu)
+    calculate_gradients = lambda u: Z*evolver.full_gradient_selection(u, beta)
+    sd = evolver.calculate_stationary_distribution(beta)
+
     v = np.asarray(xy_to_barycentric_coordinates(simplex.X, simplex.Y, simplex.corners))
     v_int = np.floor(v * Z).astype(np.int64)
-
-    evolver = egt.analytical.StochDynamics(3, payoffs, Z, N, mu)
-
     result = np.asarray([[evolver.full_gradient_selection(v_int[:, i, j], beta) for j in range(v_int.shape[2])] for i in range(v_int.shape[1])]).swapaxes(0, 1).swapaxes(0, 2)
+    
     xy_results = vectorized_barycentric_to_xy_coordinates(result, simplex.corners)
-
     Ux = xy_results[:, :, 0].astype(np.float64)
     Uy = xy_results[:, :, 1].astype(np.float64)
 
-    calculate_gradients = lambda u: Z*evolver.full_gradient_selection(u, beta)
-    roots = find_roots_in_discrete_barycentric_coordinates(calculate_gradients, Z, nb_interior_points=5151, atol=1e-1)
-    #roots_xy = [barycentric_to_xy_coordinates(x, simplex.corners) for x in roots]
-    stability = calculate_stability(roots, calculate_gradients)
-
-    evolver.mu = 1/Z
-    sd = evolver.calculate_stationary_distribution(beta)
-
-    fig, ax = plt.subplots(figsize=(15,10))
-
-    plot = (simplex.add_axis(ax=ax) 
+    plot = (simplex.add_axis(ax=ax)
         .apply_simplex_boundaries_to_gradients(Ux, Uy)
         .draw_gradients(zorder=5)
-        #.add_colorbar()
-        #.draw_stationary_points(roots_xy, stability, zorder=11)
+        .add_colorbar()
         .add_vertex_labels(strategy_labels)
-        .draw_stationary_distribution(sd, vmax=0.0001, alpha=0.5, edgecolors='gray',cmap='binary', shading='gouraud', zorder=0)
-        .draw_trajectory_from_roots(lambda u, t: Z*evolver.full_gradient_selection_without_mutation(u, beta),
-            roots,
-            stability,
-            trajectory_length=30,
-            linewidth=1,
-            step=0.001,
-            color='k', draw_arrow=True, arrowdirection='right', arrowsize=30, zorder=10, arrowstyle='fancy')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+        .draw_stationary_distribution(sd, alpha=1, edgecolors='gray', cmap='binary',shading='gouraud', zorder=0)
     )
 
     ax.axis('off')
@@ -390,20 +374,45 @@ if __name__ == '__main__':
     plt.ylim((-.02, simplex.top_corner + 0.05))
     plt.show()
 
-    #print(payoffs)
-    #print(payoffs.shape)
 
-    #fig, ax = plt.subplots(figsize=(10,8))
 
-    #simplex, gradients, roots, roots_xy, stability = plot_replicator_dynamics_in_simplex(payoffs, ax=ax)
+    #simplex = egt.plotting.Simplex2D(discrete=True, size=Z, nb_points=Z+1)
+    #v = np.asarray(xy_to_barycentric_coordinates(simplex.X, simplex.Y, simplex.corners))
+    #v_int = np.floor(v * Z).astype(np.int64)
 
-    #plot = (simplex.draw_triangle()
-              # .draw_gradients(density=1)
-              # .add_colorbar(label='gradient of selection')
-              # .add_vertex_labels(strategy_labels, epsilon_bottom=0.12)
-              # .draw_stationary_points(roots_xy, stability)
-              # .draw_scatter_shadow(lambda u, t: egt.analytical.replicator_equation(u, payoffs), 100, color='gray', marker='.', s=0.1)
-              #)
+    #evolver = egt.analytical.StochDynamics(3, payoffs, Z, N, mu)
+
+    #result = np.asarray([[evolver.full_gradient_selection(v_int[:, i, j], beta) for j in range(v_int.shape[2])] for i in range(v_int.shape[1])]).swapaxes(0, 1).swapaxes(0, 2)
+    #xy_results = vectorized_barycentric_to_xy_coordinates(result, simplex.corners)
+
+    #Ux = xy_results[:, :, 0].astype(np.float64)
+    #Uy = xy_results[:, :, 1].astype(np.float64)
+
+    #calculate_gradients = lambda u: Z*evolver.full_gradient_selection(u, beta)
+    #roots = find_roots_in_discrete_barycentric_coordinates(calculate_gradients, Z, nb_interior_points=5151, atol=1e-1)
+    #roots_xy = [barycentric_to_xy_coordinates(x, simplex.corners) for x in roots]
+    #stability = calculate_stability(roots, calculate_gradients)
+
+    #evolver.mu = 1/Z
+    #sd = evolver.calculate_stationary_distribution(beta)
+
+    #fig, ax = plt.subplots(figsize=(15,10))
+
+    #plot = (simplex.add_axis(ax=ax) 
+        #.apply_simplex_boundaries_to_gradients(Ux, Uy)
+        #.draw_gradients(zorder=5)
+        #.add_colorbar()
+        #.draw_stationary_points(roots_xy, stability, zorder=11)
+        #.add_vertex_labels(strategy_labels)
+        #.draw_stationary_distribution(sd, vmax=0.0001, alpha=0.5, edgecolors='gray',cmap='binary', shading='gouraud', zorder=0)
+        #.draw_trajectory_from_roots(lambda u, t: Z*evolver.full_gradient_selection_without_mutation(u, beta),
+            #roots,
+            #stability,
+            #trajectory_length=30,
+            #linewidth=1,
+            #step=0.001,
+            #color='k', draw_arrow=True, arrowdirection='right', arrowsize=30, zorder=10, arrowstyle='fancy')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+    #)
 
     #ax.axis('off')
     #ax.set_aspect('equal')
