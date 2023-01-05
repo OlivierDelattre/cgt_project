@@ -4,12 +4,14 @@ import math
 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
-#import seaborn as sns
+
+import seaborn as sns
 
 from egttools.plotting.simplified import plot_replicator_dynamics_in_simplex#, plot_pairwise_comparison_rule_dynamics_in_simplex_without_roots
 from egttools.plotting.helpers    import (xy_to_barycentric_coordinates, barycentric_to_xy_coordinates, find_roots_in_discrete_barycentric_coordinates, calculate_stability)
 from egttools.analytical.utils    import (find_roots, check_replicator_stability_pairwise_games)
 from egttools.helpers.vectorized  import vectorized_replicator_equation, vectorized_barycentric_to_xy_coordinates
+from simulate import *
 
 
 def theta(x): return 0 if x < 0 else 1
@@ -193,19 +195,11 @@ class CRDWithExecutor():
                 PI_E = self.executor_fixed_incentives_payoff(jc, je)
                 PI_C = self.cooperator_fixed_incentives_payoff(jc, je)
 
-                #PI_D = self.defector_average_payoffs_fixed()
-                #PI_E = self.executor_average_payoffs_fixed()
-                #PI_C = self.cooperator_average_payoffs_fixed()
-
             else:
                 
                 PI_D = self.defector_flexible_incentives_payoff(jc, je)
                 PI_E = self.executor_flexible_incentives_payoff(jc, je)
                 PI_C = self.cooperator_flexible_incentives_payoff(jc, je)
-
-                #PI_D = self.defector_average_payoffs_flexible()
-                #PI_E = self.executor_average_payoffs_flexible()
-                #PI_C = self.cooperator_average_payoffs_flexible()
            
             payoffs[0, i] = PI_D
             payoffs[1, i] = PI_E
@@ -215,29 +209,6 @@ class CRDWithExecutor():
 
         return self.payoffs_
 
-#    def calculate_payoffs(self) -> np.ndarray:  # Array of shape (nb_strategies, nb_states_)
-#        
-#        payoffs = np.zeros((self.nb_strategies_, self.nb_strategies_))
-#
-#        for i in range(self.nb_strategies_):
-#
-#            if self.incentive == 'fixed':
-#                PI_D = self.defector_average_payoffs_fixed()
-#                PI_E = self.executor_average_payoffs_fixed()
-#                PI_C = self.cooperator_average_payoffs_fixed()
-#            
-#            else:
-#                PI_D = self.defector_average_payoffs_flexible()
-#                PI_E = self.executor_average_payoffs_flexible()
-#                PI_C = self.cooperator_average_payoffs_flexible()
-#            
-#            payoffs[0, i] = PI_D
-#            payoffs[1, i] = PI_E
-#            payoffs[2, i] = PI_C
-#
-#        self.payoffs_ = payoffs
-#
-#        return self.payoffs_
 
     def T(self, L, R, pop_idx):
         self.set_population_state(pop_idx)
@@ -274,7 +245,6 @@ class CRDWithExecutor():
         self.set_population_state(i)
         total = 0
         ic, ie = self.ic, self.ie
-        #ic, ie = self.ic, self.ie
         for jc in range(self.N + 1):
             for je in range(self.N - jc + 1):        
                 total += math.comb(ic, jc)*math.comb(ie, je)*math.comb(int(self.Z-ic-ie), self.N-jc-je)*theta(jc + je - self.M)
@@ -350,14 +320,18 @@ if __name__ == '__main__':
     b  = 1.           # Endowment (individual's money/funds/...)
     c  = 0.1         # Amount of money individuals contribute
     Mc = 0.3         # Minimum collective contribution
-    M  = 3.           # OR Minimum number of cooperators
+    M  = 3.          # OR Minimum number of cooperators
     r  = 0.2         # If minimum is not met: All group participants lose their endowment with probability r, else: individuals retain their endowments
     pi_t = 0.03
     pi_e = 0.3
-    n_e = 0.25
-    alpha = 0.
+    n_e = 1.
+    alpha = 1.
     mu    = 1/Z
     beta = 5.
+
+    transitory = 10**2      # num of steps before we start counting
+    nb_generations = 10**4  # num of steps where we do count
+    nb_runs = 10            # num of different runs we average over
 
     strategy_labels = ["Defector", "Executor", "Cooperator"]
 
@@ -382,7 +356,16 @@ if __name__ == '__main__':
     simplex = egt.plotting.Simplex2D(discrete=True, size=Z, nb_points=Z+1)
     evolver = egt.analytical.StochDynamics(3, payoffs, Z, N, mu)
     calculate_gradients = lambda u: Z*evolver.full_gradient_selection(u, beta)
-    sd = evolver.calculate_stationary_distribution(beta)
+    
+    sd = estimate_stationary_distribution(
+        game=game,
+        nb_runs=nb_runs,
+        transitory=transitory,
+        nb_generations=nb_generations,
+        beta=beta,
+        mu=mu,
+        Z=Z,
+    )
 
     v = np.asarray(xy_to_barycentric_coordinates(simplex.X, simplex.Y, simplex.corners))
     v_int = np.floor(v * Z).astype(np.int64)
@@ -405,49 +388,3 @@ if __name__ == '__main__':
     plt.xlim((-.05,1.05))
     plt.ylim((-.02, simplex.top_corner + 0.05))
     plt.show()
-
-
-
-    #simplex = egt.plotting.Simplex2D(discrete=True, size=Z, nb_points=Z+1)
-    #v = np.asarray(xy_to_barycentric_coordinates(simplex.X, simplex.Y, simplex.corners))
-    #v_int = np.floor(v * Z).astype(np.int64)
-
-    #evolver = egt.analytical.StochDynamics(3, payoffs, Z, N, mu)
-
-    #result = np.asarray([[evolver.full_gradient_selection(v_int[:, i, j], beta) for j in range(v_int.shape[2])] for i in range(v_int.shape[1])]).swapaxes(0, 1).swapaxes(0, 2)
-    #xy_results = vectorized_barycentric_to_xy_coordinates(result, simplex.corners)
-
-    #Ux = xy_results[:, :, 0].astype(np.float64)
-    #Uy = xy_results[:, :, 1].astype(np.float64)
-
-    #calculate_gradients = lambda u: Z*evolver.full_gradient_selection(u, beta)
-    #roots = find_roots_in_discrete_barycentric_coordinates(calculate_gradients, Z, nb_interior_points=5151, atol=1e-1)
-    #roots_xy = [barycentric_to_xy_coordinates(x, simplex.corners) for x in roots]
-    #stability = calculate_stability(roots, calculate_gradients)
-
-    #evolver.mu = 1/Z
-    #sd = evolver.calculate_stationary_distribution(beta)
-
-    #fig, ax = plt.subplots(figsize=(15,10))
-
-    #plot = (simplex.add_axis(ax=ax) 
-        #.apply_simplex_boundaries_to_gradients(Ux, Uy)
-        #.draw_gradients(zorder=5)
-        #.add_colorbar()
-        #.draw_stationary_points(roots_xy, stability, zorder=11)
-        #.add_vertex_labels(strategy_labels)
-        #.draw_stationary_distribution(sd, vmax=0.0001, alpha=0.5, edgecolors='gray',cmap='binary', shading='gouraud', zorder=0)
-        #.draw_trajectory_from_roots(lambda u, t: Z*evolver.full_gradient_selection_without_mutation(u, beta),
-            #roots,
-            #stability,
-            #trajectory_length=30,
-            #linewidth=1,
-            #step=0.001,
-            #color='k', draw_arrow=True, arrowdirection='right', arrowsize=30, zorder=10, arrowstyle='fancy')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-    #)
-
-    #ax.axis('off')
-    #ax.set_aspect('equal')
-    #plt.xlim((-.05,1.05))
-    #plt.ylim((-.02, simplex.top_corner + 0.05))
-    #plt.show()
