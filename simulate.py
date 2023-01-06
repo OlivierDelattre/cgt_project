@@ -33,7 +33,7 @@ def step(game, evolver, current_population, beta, mu, Z, payoffs):
             # Adopt strategy of opponent
             population[idv0] -= 1
             population[idv1] += 1
-    
+
     return population
 
 def estimate_stationary_distribution(game:CRDWithExecutor, nb_runs, transitory, nb_generations, beta, mu, Z):
@@ -42,7 +42,7 @@ def estimate_stationary_distribution(game:CRDWithExecutor, nb_runs, transitory, 
 
     stationary_distribution_sum = np.zeros((num_population_states,), dtype=np.float64)
     for run in range(nb_runs):
-        print(f"\t\t--- Run {run} ---")
+        # print(f"\t\t--- Run {run} ---")
         current_population = egt.sample_simplex(
             np.random.randint(0, num_population_states),
             game.Z,
@@ -50,35 +50,35 @@ def estimate_stationary_distribution(game:CRDWithExecutor, nb_runs, transitory, 
         game.set_population_state(current_population)
         payoffs = game.calculate_payoffs()
         evolver = egt.analytical.StochDynamics(
-            3, 
-            np.array(payoffs), 
-            pop_size=game.Z, 
-            group_size=game.N, 
+            3,
+            np.array(payoffs),
+            pop_size=game.Z,
+            group_size=game.N,
             mu=game.mu)
 
         run_count = np.zeros((num_population_states,), dtype=np.float64)
-        print(f"Initial state:\t {current_population}")
+        # print(f"Initial state:\t {current_population}")
 
         for _ in range(transitory):
             current_population = step(game, evolver, current_population, beta, mu, Z, payoffs)
             game.set_population_state(current_population)
-        print(f"After transitory period:\t {current_population}")
+        # print(f"After transitory period:\t {current_population}")
 
         for s in range(nb_generations-transitory):
-            if s % 100 == 0:
-                print("Step ", s, end='\r')
+            # if s % 100 == 0:
+            #     print("Step ", s, end='\r')
             current_population = step(game, evolver, current_population, beta, mu, Z, payoffs)
             state = egt.calculate_state(game.Z, current_population)
             run_count[state] += 1
             game.set_population_state(current_population)
-        print(f"Final state:\t {current_population}")
+        # print(f"Final state:\t {current_population}")
 
         stationary_distribution_sum += run_count/(nb_generations-transitory)
 
     stationary_distribution = stationary_distribution_sum / nb_runs
     return stationary_distribution
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
 
     Z  = 100         # Population size
     N  = 4           # Group size

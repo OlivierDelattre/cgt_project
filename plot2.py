@@ -3,8 +3,8 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-from run import CRDWithExecutor, Cooperator, Defector, Executor
-
+# from run import CRDWithExecutor, Cooperator, Defector, Executor
+from run import *
 if __name__ == '__main__': 
 
     Z = 100         # Population size
@@ -66,15 +66,15 @@ if __name__ == '__main__':
 
     strategy_labels = ["Defector", "Executor", "Cooperator"]
 
-    fig, ax = plt.subplots(figsize=(5, 5), dpi=150)
-    G = egt.plotting.draw_stationary_distribution(strategy_labels,
-                                                1/Z, fixation_probabilities, stationary_distribution,
-                                                node_size=600, 
-                                                font_size_node_labels=8,
-                                                font_size_edge_labels=8,
-                                                font_size_sd_labels=8,
-                                                edge_width=1,
-                                                min_strategy_frequency=-0.01, 
-                                                ax=ax)
-    plt.axis('off')
-    plt.show() # display
+    # fig, ax = plt.subplots(figsize=(5, 5), dpi=150)
+    # G = egt.plotting.draw_stationary_distribution(strategy_labels,
+    #                                             1/Z, fixation_probabilities, stationary_distribution,
+    #                                             node_size=600,
+    #                                             font_size_node_labels=8,
+    #                                             font_size_edge_labels=8,
+    #                                             font_size_sd_labels=8,
+    #                                             edge_width=1,
+    #                                             min_strategy_frequency=-0.01,
+    #                                             ax=ax)
+    # plt.axis('off')
+    # plt.show() # display

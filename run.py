@@ -11,7 +11,7 @@ from egttools.plotting.simplified import plot_replicator_dynamics_in_simplex#, p
 from egttools.plotting.helpers    import (xy_to_barycentric_coordinates, barycentric_to_xy_coordinates, find_roots_in_discrete_barycentric_coordinates, calculate_stability)
 from egttools.analytical.utils    import (find_roots, check_replicator_stability_pairwise_games)
 from egttools.helpers.vectorized  import vectorized_replicator_equation, vectorized_barycentric_to_xy_coordinates
-from simulate import *
+# from simulate import *
 
 
 def theta(x): return 0 if x < 0 else 1
@@ -251,6 +251,16 @@ class CRDWithExecutor():
         total *= (1/math.comb(self.Z, self.N))
         return total
 
+    def aI(self, i):
+            self.set_population_state(i)
+            total = 0
+            ic, ie = self.ic, self.ie
+            for jc in range(self.N + 1):
+                for je in range(self.N - jc + 1):        
+                    total += math.comb(ic, jc)*math.comb(ie, je)*math.comb(int(self.Z-ic-ie), self.N-jc-je)*self.Delta(je)
+            total *= (1/math.comb(self.Z, self.N))
+            return total
+
     def payoffs(self)->np.ndarray:
         return self.payoffs_
 
@@ -357,34 +367,40 @@ if __name__ == '__main__':
     evolver = egt.analytical.StochDynamics(3, payoffs, Z, N, mu)
     calculate_gradients = lambda u: Z*evolver.full_gradient_selection(u, beta)
     
-    sd = estimate_stationary_distribution(
-        game=game,
-        nb_runs=nb_runs,
-        transitory=transitory,
-        nb_generations=nb_generations,
-        beta=beta,
-        mu=mu,
-        Z=Z,
-    )
+    # sd = estimate_stationary_distribution(
+    #     game=game,
+    #     nb_runs=nb_runs,
+    #     transitory=transitory,
+    #     nb_generations=nb_generations,
+    #     beta=beta,
+    #     mu=mu,
+    #     Z=Z,
+    # )
+    #
+    # group_achievement = sum([
+    #     sd[i]*game.aI(i) for i in range(len(sd))
+    # ])
+    #
+    # print(group_achievement)
 
-    v = np.asarray(xy_to_barycentric_coordinates(simplex.X, simplex.Y, simplex.corners))
-    v_int = np.floor(v * Z).astype(np.int64)
-    result = np.asarray([[evolver.full_gradient_selection(v_int[:, i, j], beta) for j in range(v_int.shape[2])] for i in range(v_int.shape[1])]).swapaxes(0, 1).swapaxes(0, 2)
+    # v = np.asarray(xy_to_barycentric_coordinates(simplex.X, simplex.Y, simplex.corners))
+    # v_int = np.floor(v * Z).astype(np.int64)
+    # result = np.asarray([[evolver.full_gradient_selection(v_int[:, i, j], beta) for j in range(v_int.shape[2])] for i in range(v_int.shape[1])]).swapaxes(0, 1).swapaxes(0, 2)
     
-    xy_results = vectorized_barycentric_to_xy_coordinates(result, simplex.corners)
-    Ux = xy_results[:, :, 0].astype(np.float64)
-    Uy = xy_results[:, :, 1].astype(np.float64)
+    # xy_results = vectorized_barycentric_to_xy_coordinates(result, simplex.corners)
+    # Ux = xy_results[:, :, 0].astype(np.float64)
+    # Uy = xy_results[:, :, 1].astype(np.float64)
 
-    plot = (simplex.add_axis(ax=ax)
-        .apply_simplex_boundaries_to_gradients(Ux, Uy)
-        .draw_gradients(zorder=5)
-        .add_colorbar()
-        .add_vertex_labels(strategy_labels)
-        .draw_stationary_distribution(sd, alpha=1, edgecolors='gray', cmap='binary',shading='gouraud', zorder=0)
-    )
-
-    ax.axis('off')
-    ax.set_aspect('equal')
-    plt.xlim((-.05,1.05))
-    plt.ylim((-.02, simplex.top_corner + 0.05))
-    plt.show()
+    # plot = (simplex.add_axis(ax=ax)
+    #     .apply_simplex_boundaries_to_gradients(Ux, Uy)
+    #     .draw_gradients(zorder=5)
+    #     .add_colorbar()
+    #     .add_vertex_labels(strategy_labels)
+    #     .draw_stationary_distribution(sd, alpha=1, edgecolors='gray', cmap='binary',shading='gouraud', zorder=0)
+    # )
+    #
+    # ax.axis('off')
+    # ax.set_aspect('equal')
+    # plt.xlim((-.05,1.05))
+    # plt.ylim((-.02, simplex.top_corner + 0.05))
+    # plt.show()
