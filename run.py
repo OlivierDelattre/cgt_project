@@ -103,15 +103,16 @@ class CRDWithExecutor():
 
     # flexible incentive
     def defector_flexible_incentives_payoff(self, jc, je):
-        # Division by 0 when jc + je = 4
-        res = self.base_defector_payoff(jc + je) - (1 - self.alpha) * (
-                    (self.pi_t * je * self.delta) / (self.N - jc - je)) * self.Delta(je)
-        # print("jc+e res", jc+je, res)
-        return res
-
+        if (self.N - jc - je) == 0:
+            return 0
+        else:
+            return self.base_defector_payoff(jc+je) - (1 - self.alpha)*((self.pi_t * je * self.delta)/(self.N - jc - je))*self.Delta(je)
+    
     def cooperator_flexible_incentives_payoff(self, jc, je):
-        return self.base_defector_payoff(jc + je) + self.alpha * (
-                    (self.pi_t * je * self.delta) / (jc + je)) * self.Delta(je) - self.c
+        if je + jc == 0:
+            return 0
+        else:
+            return self.base_defector_payoff(jc+je) + self.alpha *((self.pi_t * je * self.delta)/(jc + je))*self.Delta(je) - self.c
 
     def executor_flexible_incentives_payoff(self, jc, je):
         return self.cooperator_flexible_incentives_payoff(jc, je) - self.pi_t
