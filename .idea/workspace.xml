@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3c3a259c-1517-44e4-84a2-9739690d7836" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/plot_triangle.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/triangle_figure/Figure_1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/triangle_figure/Figure_2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/triangle_figure/Figure_3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/triangle_figure/Figure_4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/triangle_figure/Figure_5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/triangle_figure/Figure_6.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plot3A.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot3A.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot3B.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot3B.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

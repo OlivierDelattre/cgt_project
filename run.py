@@ -150,6 +150,16 @@ class CRDWithExecutor():
                     / math.comb(self.Z-1, self.N-1)) * self.cooperator_flexible_incentives_payoff(jc+1, je)
         return fc
 
+    def cooperator_average_reward_flexible(self):
+        rew = 0
+        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
+        for jc in range(self.N):
+            for je in range(self.N - jc):
+                rew += ((math.comb(ic - 1, jc) * math.comb(ie, je) * math.comb(self.Z - ic - ie,
+                                                                              self.N - 1 - jc - je)) \
+                       / math.comb(self.Z - 1, self.N - 1)) * self.cooperator_flexible_incentives_payoff(jc + 1, je)
+        return rew
+
     def executor_average_payoffs_flexible(self):
         fe = 0
         id, ie, ic = int(self.id), int(self.ie), int(self.ic)

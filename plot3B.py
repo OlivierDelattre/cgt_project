@@ -8,45 +8,47 @@ from simulate import *
 
 
 def computeNIs():
-    nIs_risk0 = np.zeros(10)
-    nIs_risk02 = np.zeros(10)
-    nIs_risk05 = np.zeros(10)
+    avg_coop_reward = np.zeros(10)
+    avg_exc_reward = np.zeros(10)
+    avg_def_fine = np.zeros(10)
     for alpha in range(0, 10):
-        for risk in [0.0, 0.2, 0.5]:
-            game = CRDWithExecutor(
-                strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha / 10), Cooperator(c, b)],
-                initial_endowment=b,
-                population_size=Z,
-                group_size=N,
-                cost=c,
-                risk=risk,
-                alpha=alpha / 10,
-                cooperation_threshold=M,
-                enhancement_factor=1,
-                pi_t=pi_t,
-                pi_e=pi_e,
-                n_e=n_e,
-                mu=mu)
-            sd = estimate_stationary_distribution(
-                game=game,
-                nb_runs=nb_runs,
-                transitory=transitory,
-                nb_generations=nb_generations,
-                beta=beta,
-                mu=mu,
-                Z=Z,
-            )
-            group_achievement = sum([
-                sd[i] * game.aI(i) for i in range(len(sd))
-            ])
-            if risk == 0.0:
-                nIs_risk0[alpha] = group_achievement
-            elif risk == 0.2:
-                nIs_risk02[alpha] = group_achievement
-            else:
-                nIs_risk05[alpha] = group_achievement
-            print(f"{group_achievement} for alpha : {alpha / 10}")  # institution prevalence
-    return nIs_risk0, nIs_risk02, nIs_risk05
+        game = CRDWithExecutor(
+            strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha / 10), Cooperator(c, b)],
+            initial_endowment=b,
+            population_size=Z,
+            group_size=N,
+            cost=c,
+            risk=r,
+            alpha=alpha / 10,
+            cooperation_threshold=M,
+            enhancement_factor=1,
+            pi_t=pi_t,
+            pi_e=pi_e,
+            n_e=n_e,
+            mu=mu)
+        sd = estimate_stationary_distribution(
+            game=game,
+            nb_runs=nb_runs,
+            transitory=transitory,
+            nb_generations=nb_generations,
+            beta=beta,
+            mu=mu,
+            Z=Z,
+        )
+        group_achievement = sum([
+            sd[i] * game.aI(i) for i in range(len(sd))
+        ])
+        avg_coop_reward[alpha] = game.cooperator_average_payoffs_fixed()
+        avg_exc_reward[alpha] = game.executor_average_payoffs_fixed()
+
+        # if risk == 0.0:
+        #     avg_coop_reward[alpha] = group_achievement
+        # elif risk == 0.2:
+        #     avg_exc_reward[alpha] = group_achievement
+        # else:
+        #     avg_def_fine[alpha] = group_achievement
+        print(f"{group_achievement} for alpha : {alpha / 10}")  # institution prevalence
+    return avg_coop_reward, avg_exc_reward, avg_def_fine
 
 
 if __name__ == '__main__':
