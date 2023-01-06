@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     #FIG A
     for r in [0, 0.2, 0.5]:
-        for alpha in [0, 0.2, 0.4, 0.6, 0.8, 1]:
+        for alpha in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
             game = CRDWithExecutor(
                 strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],
                 initial_endowment=b,
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
             print(f'r={r}_alpha={alpha}_mu={mu} => ', group_achievement)
 
-            with open(f'fig2A_r={r}_alpha={alpha}_mu={mu}.pickle', 'wb') as f:
+            with open(f'fig2A_r={r}_alpha={alpha}_mu={mu}_diffne.pickle', 'wb') as f:
                 pickle.dump([payoffs, stationary_distribution, group_achievement], f)
 
     #FIG B
