@@ -8,7 +8,11 @@ from simulate import *
 
 
 def computeAvgReward():
-    for alpha in range(0, 10):
+    avg_def_reward_alphas = []
+    avg_coop_reward_alphas = []
+    avg_exc_reward_alphas = []
+    for alpha in range(0, 10+1):
+            # in [0.1,0.2] :
         game = CRDWithExecutor(
             strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha / 10), Cooperator(c, b)],
             initial_endowment=b,
@@ -18,25 +22,27 @@ def computeAvgReward():
             risk=r,
             alpha=alpha / 10,
             cooperation_threshold=M,
-            enhancement_factor=1,
+            enhancement_factor=3,
             pi_t=pi_t,
             pi_e=pi_e,
             n_e=n_e,
             mu=mu)
-        sd = estimate_stationary_distribution(
-            game=game,
-            nb_runs=nb_runs,
-            transitory=transitory,
-            nb_generations=nb_generations,
-            beta=beta,
-            mu=mu,
-            Z=Z,
-        )
-        avg_def_reward = game.ce_rewards_d_fines[0]/game.nb_states_
-        avg_exc_reward = game.ce_rewards_d_fines[1] / game.nb_states_
-        avg_coop_reward = game.ce_rewards_d_fines[2] / game.nb_states_
-        print(f"{avg_def_reward}, {avg_exc_reward}, {avg_coop_reward} for alpha : {alpha / 10}")  # Avg reward/fine
-    return avg_def_reward, avg_exc_reward, avg_coop_reward
+        game.calculate_payoffs()
+        # sd = estimate_stationary_distribution(
+        #     game=game,
+        #     nb_runs=nb_runs,
+        #     transitory=transitory,
+        #     nb_generations=nb_generations,
+        #     beta=beta,
+        #     mu=mu,
+        #     Z=Z,
+        # )
+        # avg_def_reward=
+        avg_def_reward_alphas.append(np.mean(game.ce_rewards_d_fines[0]))
+        avg_exc_reward_alphas.append(np.mean(game.ce_rewards_d_fines[1]))
+        avg_coop_reward_alphas.append(np.mean(game.ce_rewards_d_fines[2]))
+        # print(f"{avg_def_reward}, {avg_exc_reward}, {avg_coop_reward} for alpha : {alpha / 10}")  # Avg reward/fine
+    return avg_def_reward_alphas, avg_exc_reward_alphas, avg_coop_reward_alphas
 
 
 if __name__ == '__main__':
@@ -102,24 +108,28 @@ if __name__ == '__main__':
     strategy_labels = ["Defector", "Executor", "Cooperator"]
     colors = sns.color_palette("viridis", 3)
     fix, ax = plt.subplots(figsize=(8, 5))
-    avg_rewards_fine = computeAvgReward()
-    print(avg_rewards_fine)
+    # avg_rewards_fine = computeAvgReward()
+    # print(avg_rewards_fine)
+    avg_def_reward_alphas, avg_exc_reward_alphas, avg_coop_reward_alphas= computeAvgReward()
+    print(avg_coop_reward_alphas)
     # nIgsPerRisk= np.empty([3, 10])
     # np.vstack((nIgsPerRisk,nIs_risk0))
     # [nIgsPerRisk, [nIs_risk0, nIs_risk02, nIs_risk05]]
     # print(nIgsPerRisk)
 
     # for i, color in enumerate(colors):
-    #     ax.plot(np.linspace(0.0, 1.0, num=10), avg_rewards_fine[i], color=color, lw=2)
-
-    # nIs =np.zeros(10)
-    # ax.plot(np.linspace(0.0, 1.0, num=10), nIs)
+    #     ax.plot(np.linspace(0.0, 1.0, num=10), avg_rewards_fine[i], color=color, lw=2, '*--', label='r = 0')
+    #     ax.scatter(betas, 1 - coop_level_analytical, marker='x', label="analytical")
 
     # ax.scatter(betas, 1 - coop_level_analytical, marker='x', label="analytical")
     # ax.scatter(betas, coop_level, marker='o', label="numerical")
 
-    # ax.set_ylabel('Average fine / reward', fontsize=15, fontweight='bold')
-    # ax.set_xlabel('Mixed coefficient (alpha)', fontsize=15, fontweight='bold')
+    # plt.figure()
+    plt.plot(np.arange(0, 1.01, 0.1), avg_def_reward_alphas, label='fine of defectors')
+    plt.plot(np.arange(0, 1.01, 0.1), avg_exc_reward_alphas, label='Reward of excecutor')
+    plt.plot(np.arange(0, 1.01, 0.1), avg_coop_reward_alphas, label='Reward of cooperator')
+    ax.set_ylabel('Average fine / reward', fontsize=15, fontweight='bold')
+    ax.set_xlabel('Mixed coefficient (alpha)', fontsize=15, fontweight='bold')
     # ax.yaxis.set_minor_locator(AutoMinorLocator())
     # ax.tick_params(axis='x', which='both', labelsize=15, width=3)
     # ax.tick_params(axis='y', which='both',
@@ -128,5 +138,5 @@ if __name__ == '__main__':
     #     tick.label1.set_fontweight('bold')
     # for tick in ax.yaxis.get_major_ticks():
     #     tick.label1.set_fontweight('bold')
-    # plt.show()
+    plt.show()
 

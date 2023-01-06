@@ -227,8 +227,8 @@ class CRDWithExecutor():
                 PI_C = self.cooperator_flexible_incentives_payoff(jc, je)
 
             ce_rewards_d_fines[0, i] = RI_D
-            ce_rewards_d_fines[0, i] = RI_E
-            ce_rewards_d_fines[0, i] = RI_C
+            ce_rewards_d_fines[1, i] = RI_E
+            ce_rewards_d_fines[2, i] = RI_C
             payoffs[0, i] = PI_D
             payoffs[1, i] = PI_E
             payoffs[2, i] = PI_C
