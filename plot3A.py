@@ -68,88 +68,6 @@ if __name__ == '__main__':
     nb_generations = 10 ** 4  # num of steps where we do count
     nb_runs = 10  # num of different runs we average over
 
-    # game = CRDWithExecutor(
-    #     strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],
-    #     initial_endowment=b,
-    #     population_size=Z,
-    #     group_size=N,
-    #     cost=c,
-    #     risk=r,
-    #     alpha=alpha,
-    #     cooperation_threshold=M,
-    #     enhancement_factor=1,
-    #     pi_t=pi_t,
-    #     pi_e=pi_e,
-    #     n_e=n_e,
-    #     mu=mu)
-
-    # payoffs = game.calculate_payoffs()
-    #
-    # evolver = egt.analytical.StochDynamics(
-    #     3,
-    #     np.array(payoffs),
-    #     pop_size=game.Z,
-    #     group_size=game.N,
-    #     mu=game.mu)
-
-    # for i in range(egt.calculate_nb_states(4, 3)):
-    #     print(egt.sample_simplex(i, 4, 3), " -> ", payoffs.transpose()[i])
-
-    # transition_matrix = evolver.calculate_full_transition_matrix(beta=beta)
-
-    # incredibly slow + bugged in egttools 1.11
-    # stationary_distribution = evolver.calculate_stationary_distribution(beta=beta)
-    # sd = estimate_stationary_distribution(
-    #     game=game,
-    #     nb_runs=nb_runs,
-    #     transitory=transitory,
-    #     nb_generations=nb_generations,
-    #     beta=beta,
-    #     mu=mu,
-    #     Z=Z,
-    # )
-    #
-    # #print(transition_matrix)
-    #
-    # group_achievement = sum([
-    #     sd[i]*game.aI(i) for i in range(len(sd))
-    # ])
-    #
-    # print(group_achievement) #institution prevalence
-    # 0.9437020978331407
-
-    # for alpha in range(0, 10):
-    #     nIs = np.zeros(10)
-    #     game = CRDWithExecutor(
-    #         strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha/10), Cooperator(c, b)],
-    #         initial_endowment=b,
-    #         population_size=Z,
-    #         group_size=N,
-    #         cost=c,
-    #         risk=risk,
-    #         alpha=alpha/10,
-    #         cooperation_threshold=M,
-    #         enhancement_factor=1,
-    #         pi_t=pi_t,
-    #         pi_e=pi_e,
-    #         n_e=n_e,
-    #         mu=mu)
-    #     payoffs = game.calculate_payoffs()
-    #     sd = estimate_stationary_distribution(
-    #         game=game,
-    #         nb_runs=nb_runs,
-    #         transitory=transitory,
-    #         nb_generations=nb_generations,
-    #         beta=beta,
-    #         mu=mu,
-    #         Z=Z,
-    #     )
-    #     group_achievement = sum([
-    #         sd[i] * game.aI(i) for i in range(len(sd))
-    #     ])
-    #     nIs[alpha]=group_achievement
-    #     print(f"{group_achievement} for alpha : {alpha/10}")  # institution prevalence
-
     strategy_labels = ["Defector", "Executor", "Cooperator"]
     colors = sns.color_palette("viridis", 3)
     fix, ax = plt.subplots(figsize=(8, 5))
@@ -160,9 +78,6 @@ if __name__ == '__main__':
     # print(nIgsPerRisk)
     for i, color in enumerate(colors):
         ax.plot(np.linspace(0.0, 1.0, num=10), nIgsPerRisk[i], color=color, lw=2)
-
-    # nIs =np.zeros(10)
-    # ax.plot(np.linspace(0.0, 1.0, num=10), nIs)
     ax.set_ylabel('Institution prevalence (nI)', fontsize=15, fontweight='bold')
     ax.set_xlabel('Mixed coefficient (alpha)', fontsize=15, fontweight='bold')
     ax.yaxis.set_minor_locator(AutoMinorLocator())
@@ -174,16 +89,3 @@ if __name__ == '__main__':
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontweight('bold')
     plt.show()
-
-    # fig, ax = plt.subplots(figsize=(5, 5), dpi=150)
-    # G = egt.plotting.draw_stationary_distribution(strategy_labels,
-    #                                             1/Z, fixation_probabilities, sd,
-    #                                             node_size=600,
-    #                                             font_size_node_labels=8,
-    #                                             font_size_edge_labels=8,
-    #                                             font_size_sd_labels=8,
-    #                                             edge_width=1,
-    #                                             min_strategy_frequency=-0.01,
-    #                                             ax=ax)
-    # plt.axis('off')
-    # plt.show() # display
