@@ -17,7 +17,7 @@ if __name__ == '__main__':
     r  = 0.2         # If minimum is not met: All group participants lose their endowment with probability r, else: individuals retain their endowments
     pi_t = 0.03
     pi_e = 0.3
-    n_e = 0.25
+    n_e = 2
     alpha = 1.
     mu    = 1/Z
     beta = 5.
@@ -47,7 +47,7 @@ if __name__ == '__main__':
             group_size=game.N, 
             mu=game.mu)
      
-    #incredibly slow + bugged in egttools 1.11
+        #incredibly slow + bugged in egttools 1.11
         stationary_distribution = evolver.calculate_stationary_distribution(beta=beta)
         group_achievement = sum([
             stationary_distribution[i]*game.aG(i) for i in range(len(stationary_distribution))
@@ -55,19 +55,5 @@ if __name__ == '__main__':
 
         print(f'r={r}_alpha={alpha} => ', group_achievement)
 
-        with open(f'fig2A_r={r}_alpha={alpha}.pickle', 'wb') as f:
+        with open(f'fig2A_r={r}_alpha={alpha}_diffne.pickle', 'wb') as f:
             pickle.dump([payoffs, stationary_distribution, group_achievement], f)
-
-    #strategy_labels = ["Defector", "Executor", "Cooperator"]
-    #fig, ax = plt.subplots(figsize=(5, 5), dpi=150)
-    #G = egt.plotting.draw_stationary_distribution(strategy_labels,
-    #                                            1/Z, fixation_probabilities, stationary_distribution,
-    #                                            node_size=600, 
-    #                                            font_size_node_labels=8,
-    #                                            font_size_edge_labels=8,
-    #                                            font_size_sd_labels=8,
-    #                                            edge_width=1,
-    #                                            min_strategy_frequency=-0.01, 
-    #                                            ax=ax)
-    plt.axis('off')
-    plt.show() # display
