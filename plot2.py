@@ -4,8 +4,8 @@ import math
 import matplotlib.pyplot as plt
 import pickle
 
-from run import CRDWithExecutor, Cooperator, Defector, Executor
-
+# from run import CRDWithExecutor, Cooperator, Defector, Executor
+from run import *
 if __name__ == '__main__': 
 
     Z = 100         # Population size
