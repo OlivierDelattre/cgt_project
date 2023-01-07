@@ -103,19 +103,35 @@ class CRDWithExecutor():
 
     # flexible incentive
     def defector_flexible_incentives_payoff(self, jc, je):
-        if (self.N - jc - je) == 0:
-            return 0
-        else:
-            return self.base_defector_payoff(jc+je) - (1 - self.alpha)*((self.pi_t * je * self.delta)/(self.N - jc - je))*self.Delta(je)
+        # if (self.N - jc - je) == 0:
+        #     return 0
+        # else:
+        return self.base_defector_payoff(jc+je) - self.defector_flexible_incentives_reward(jc,je)
     
     def cooperator_flexible_incentives_payoff(self, jc, je):
-        if je + jc == 0:
-            return 0
-        else:
-            return self.base_defector_payoff(jc+je) + self.alpha *((self.pi_t * je * self.delta)/(jc + je))*self.Delta(je) - self.c
+        # if je + jc == 0:
+        #     return 0
+        # else:
+        return self.base_defector_payoff(jc+je) + self.cooperator_flexible_incentives_reward(jc,je)- self.c
 
     def executor_flexible_incentives_payoff(self, jc, je):
         return self.cooperator_flexible_incentives_payoff(jc, je) - self.pi_t
+
+################################ Reward
+    def defector_flexible_incentives_reward(self,jc,je):
+        if (self.N - jc - je) == 0:
+            return 0
+        else:
+            return (1 - self.alpha) * ((self.pi_t * je * self.delta) / (self.N - jc - je)) * self.Delta(je)
+
+    def cooperator_flexible_incentives_reward(self, jc, je):
+        if je + jc == 0:
+            return 0
+        else:
+            return self.alpha *((self.pi_t * je * self.delta)/(jc + je))*self.Delta(je)
+
+    def executor_flexible_incentives_reward(self, jc, je):
+        return self.cooperator_flexible_incentives_reward(jc,je)
 
     # average payoffs fixed
 
@@ -165,16 +181,6 @@ class CRDWithExecutor():
                 fc += ((math.comb(ic - 1, jc) * math.comb(ie, je) * math.comb(self.Z - ic - ie, self.N - 1 - jc - je)) \
                        / math.comb(self.Z - 1, self.N - 1)) * self.cooperator_flexible_incentives_payoff(jc + 1, je)
         return fc
-
-    # def cooperator_average_reward_flexible(self):
-    #     rew = 0
-    #     id, ie, ic = int(self.id), int(self.ie), int(self.ic)
-    #     for jc in range(self.N):
-    #         for je in range(self.N - jc):
-    #             rew += ((math.comb(ic - 1, jc) * math.comb(ie, je) * math.comb(self.Z - ic - ie,
-    #                                                                            self.N - 1 - jc - je)) \
-    #                     / math.comb(self.Z - 1, self.N - 1)) * self.cooperator_flexible_incentives_payoff(jc + 1, je)
-    #     return rew
 
     def executor_average_payoffs_flexible(self):
         fe = 0
@@ -229,10 +235,9 @@ class CRDWithExecutor():
                 PI_D = self.defector_flexible_incentives_payoff(jc, je)
                 PI_E = self.executor_flexible_incentives_payoff(jc, je)
                 PI_C = self.cooperator_flexible_incentives_payoff(jc, je)
-                #------change below-----
-                RI_D = 0
-                RI_E = 0
-                RI_C = 0
+                RI_D = self.defector_flexible_incentives_reward(jc,je) * jd
+                RI_E = self.executor_flexible_incentives_reward(jc,je) * je
+                RI_C = self.cooperator_flexible_incentives_reward(jc,je) * jc
             ce_rewards_d_fines[0, i] = RI_D
             ce_rewards_d_fines[1, i] = RI_E
             ce_rewards_d_fines[2, i] = RI_C

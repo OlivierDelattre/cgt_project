@@ -26,8 +26,7 @@ def computeNIs():
                 pi_t=pi_t,
                 pi_e=pi_e,
                 n_e=n_e,
-                mu=mu,
-                incentive= ('local', 'flexible'))
+                mu=mu)
             # sd = estimate_stationary_distribution(
             #     game=game,
             #     nb_runs=nb_runs,

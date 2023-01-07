@@ -21,11 +21,12 @@ def computeAvgReward():
             risk=r,
             alpha=alpha,
             cooperation_threshold=M,
-            enhancement_factor=1,
+            enhancement_factor=3,
             pi_t=pi_t,
             pi_e=pi_e,
             n_e=n_e,
-            mu=mu)
+            mu=mu,
+            incentive= ('local', 'flexible'))
         game.calculate_payoffs()
         # sd = estimate_stationary_distribution(
         #     game=game,
