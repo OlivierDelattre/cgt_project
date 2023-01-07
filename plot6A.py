@@ -8,19 +8,19 @@ from simulate import *
 
 
 def computeNIs():
-    nIs_delta2 = np.zeros(10)
-    nIs_delta3 = np.zeros(10)
-    nIs_delta4 = np.zeros(10)
-    for alpha in range(0, 10):
+    nIs_delta2 = np.zeros(11)
+    nIs_delta3 = np.zeros(11)
+    nIs_delta4 = np.zeros(11)
+    for alpha in range[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
         for delta in [2, 3, 4]:
             game = CRDWithExecutor(
-                strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha / 10), Cooperator(c, b)],
+                strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],
                 initial_endowment=b,
                 population_size=Z,
                 group_size=N,
                 cost=c,
                 risk=r,
-                alpha=alpha / 10,
+                alpha=alpha,
                 cooperation_threshold=M,
                 enhancement_factor=delta,
                 pi_t=pi_t,
@@ -54,7 +54,7 @@ def computeNIs():
                 nIs_delta3[alpha] = group_achievement
             else:
                 nIs_delta4[alpha] = group_achievement
-            print(f"{group_achievement} for alpha : {alpha / 10}")  # institution prevalence
+            print(f"{group_achievement} for alpha : {alpha}")  # institution prevalence
     return nIs_delta2, nIs_delta3, nIs_delta4
 
 

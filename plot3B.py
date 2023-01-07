@@ -11,16 +11,16 @@ def computeAvgReward():
     avg_def_reward_alphas = []
     avg_coop_reward_alphas = []
     avg_exc_reward_alphas = []
-    for alpha in range(0, 10+1):
+    for alpha in range[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
             # in [0.1,0.2] :
         game = CRDWithExecutor(
-            strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha / 10), Cooperator(c, b)],
+            strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],
             initial_endowment=b,
             population_size=Z,
             group_size=N,
             cost=c,
             risk=r,
-            alpha=alpha / 10,
+            alpha=alpha,
             cooperation_threshold=M,
             enhancement_factor=3,
             pi_t=pi_t,
@@ -41,7 +41,7 @@ def computeAvgReward():
         avg_def_reward_alphas.append(np.mean(game.ce_rewards_d_fines[0]))
         avg_exc_reward_alphas.append(np.mean(game.ce_rewards_d_fines[1]))
         avg_coop_reward_alphas.append(np.mean(game.ce_rewards_d_fines[2]))
-        # print(f"{avg_def_reward}, {avg_exc_reward}, {avg_coop_reward} for alpha : {alpha / 10}")  # Avg reward/fine
+        # print(f"{avg_def_reward}, {avg_exc_reward}, {avg_coop_reward} for alpha : {alpha}")  # Avg reward/fine
     return avg_def_reward_alphas, avg_exc_reward_alphas, avg_coop_reward_alphas
 
 
