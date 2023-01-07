@@ -214,7 +214,6 @@ class CRDWithExecutor():
             jc = group_composition[2]
             je = group_composition[1]
             if self.incentive[1] == 'fixed':
-                print("fixeddddd")
                 PI_D = self.defector_fixed_incentives_payoff(jc, je)
                 PI_E = self.executor_fixed_incentives_payoff(jc, je)
                 PI_C = self.cooperator_fixed_incentives_payoff(jc, je)
@@ -226,7 +225,10 @@ class CRDWithExecutor():
                 PI_D = self.defector_flexible_incentives_payoff(jc, je)
                 PI_E = self.executor_flexible_incentives_payoff(jc, je)
                 PI_C = self.cooperator_flexible_incentives_payoff(jc, je)
-
+                #------change below-----
+                RI_D = 0
+                RI_E = 0
+                RI_C = 0
             ce_rewards_d_fines[0, i] = RI_D
             ce_rewards_d_fines[1, i] = RI_E
             ce_rewards_d_fines[2, i] = RI_C
@@ -293,6 +295,15 @@ class CRDWithExecutor():
                                                                            self.N - jc - je) * self.Delta(je)
         total *= (1 / math.comb(self.Z, self.N))
         return total
+
+    def avg_reward(self, i):
+        self.set_population_state(i)
+        rewards_coop = []
+        rewards_exc = []
+        for jc in range(self.N + 1):
+            for je in range(self.N - jc + 1):
+                rewards.append(self.cooperator_fixed_incentives_reward(je))
+        return np.mean(rewards)
 
     def payoffs(self) -> np.ndarray:
         return self.payoffs_

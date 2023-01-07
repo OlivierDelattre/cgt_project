@@ -11,7 +11,7 @@ def computeNIs():
     nIs_delta2 = np.zeros(11)
     nIs_delta3 = np.zeros(11)
     nIs_delta4 = np.zeros(11)
-    for alpha in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+    for i,alpha in enumerate([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]):
         for delta in [2, 3, 4]:
             game = CRDWithExecutor(
                 strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],
@@ -26,7 +26,8 @@ def computeNIs():
                 pi_t=pi_t,
                 pi_e=pi_e,
                 n_e=n_e,
-                mu=mu)
+                mu=mu,
+                incentive= ('local', 'flexible'))
             # sd = estimate_stationary_distribution(
             #     game=game,
             #     nb_runs=nb_runs,
@@ -49,11 +50,11 @@ def computeNIs():
                 sd[i] * game.aI(i) for i in range(len(sd))
             ])
             if delta == 2:
-                nIs_delta2[alpha] = group_achievement
+                nIs_delta2[i] = group_achievement
             elif delta == 3:
-                nIs_delta3[alpha] = group_achievement
+                nIs_delta3[i] = group_achievement
             else:
-                nIs_delta4[alpha] = group_achievement
+                nIs_delta4[i] = group_achievement
             print(f"{group_achievement} for alpha : {alpha}")  # institution prevalence
     return nIs_delta2, nIs_delta3, nIs_delta4
 
@@ -66,9 +67,9 @@ if __name__ == '__main__':
     Mc = 0.3  # Minimum collective contribution
     M = 3.  # OR Minimum number of cooperators
     r = 0.2  # If minimum is not met: All group participants lose their endowment with probability r, else: individuals retain their endowments
-    pi_t = 0.03
-    pi_e = 0.3
-    n_e = 1
+    pi_t = 0.03 # Investment to sanctioning pool
+    pi_e = 0.3 # positive incentive on cooperators
+    n_e = 2
     # alpha = 1.
     mu = 1 / Z
     beta = 5.
