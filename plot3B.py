@@ -11,7 +11,7 @@ def computeAvgReward():
     avg_def_reward_alphas = []
     avg_coop_reward_alphas = []
     avg_exc_reward_alphas = []
-    for alpha in range[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+    for alpha in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
             # in [0.1,0.2] :
         game = CRDWithExecutor(
             strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],

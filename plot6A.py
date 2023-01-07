@@ -11,7 +11,7 @@ def computeNIs():
     nIs_delta2 = np.zeros(11)
     nIs_delta3 = np.zeros(11)
     nIs_delta4 = np.zeros(11)
-    for alpha in range[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+    for alpha in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
         for delta in [2, 3, 4]:
             game = CRDWithExecutor(
                 strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],

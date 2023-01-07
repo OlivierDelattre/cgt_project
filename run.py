@@ -214,6 +214,7 @@ class CRDWithExecutor():
             jc = group_composition[2]
             je = group_composition[1]
             if self.incentive[1] == 'fixed':
+                print("fixeddddd")
                 PI_D = self.defector_fixed_incentives_payoff(jc, je)
                 PI_E = self.executor_fixed_incentives_payoff(jc, je)
                 PI_C = self.cooperator_fixed_incentives_payoff(jc, je)

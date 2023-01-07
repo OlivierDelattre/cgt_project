@@ -11,7 +11,7 @@ def computeNIs():
     nIs_risk0 = np.zeros(11)
     nIs_risk02 = np.zeros(11)
     nIs_risk05 = np.zeros(11)
-    for alpha in range[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+    for alpha in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]:
         for risk in [0.0, 0.2, 0.5]:
             game = CRDWithExecutor(
                 strategies=[Defector(c, b), Executor(c, b, pi_t, pi_e, alpha), Cooperator(c, b)],
