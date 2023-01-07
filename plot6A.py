@@ -22,20 +22,11 @@ def computeNIs():
                 risk=r,
                 alpha=alpha,
                 cooperation_threshold=M,
-                enhancement_factor=delta, #FOR PLOT 6B, delta = 3
+                enhancement_factor=delta,
                 pi_t=pi_t,
                 pi_e=pi_e,
                 n_e=n_e,
                 mu=mu)
-            # sd = estimate_stationary_distribution(
-            #     game=game,
-            #     nb_runs=nb_runs,
-            #     transitory=transitory,
-            #     nb_generations=nb_generations,
-            #     beta=beta,
-            #     mu=mu,
-            #     Z=Z,
-            # )
             payoffs = game.calculate_payoffs()
             evolver = egt.analytical.StochDynamics(
                 game.nb_strategies_,
@@ -79,9 +70,6 @@ if __name__ == '__main__':
     # ---Plot
     fix, ax = plt.subplots(figsize=(8, 5))
     nIs_delta2, nIs_delta3, nIs_delta4 = computeNIs()
-    # test = np.empty(shape=11)
-    # test2 = np.empty(shape=11)
-    # test3 = np.empty(shape=11)
     plt.plot(np.arange(0, 1.01, 0.1), nIs_delta2, '*--', label='\u03B4 = 2')
     plt.plot(np.arange(0, 1.01, 0.1), nIs_delta3, '*--', label='\u03B4 = 3')
     plt.plot(np.arange(0, 1.01, 0.1), nIs_delta4, '*--', label='\u03B4 = 4')

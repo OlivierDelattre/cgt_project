@@ -28,15 +28,6 @@ def computeAvgReward():
             mu=mu,
             incentive= ('local', 'flexible'))
         game.calculate_payoffs()
-        # sd = estimate_stationary_distribution(
-        #     game=game,
-        #     nb_runs=nb_runs,
-        #     transitory=transitory,
-        #     nb_generations=nb_generations,
-        #     beta=beta,
-        #     mu=mu,
-        #     Z=Z,
-        # )
         avg_def_reward=np.mean(game.ce_rewards_d_fines[0])
         avg_exc_reward = np.mean(game.ce_rewards_d_fines[1])
         avg_coop_reward = np.mean(game.ce_rewards_d_fines[2])
@@ -68,8 +59,6 @@ if __name__ == '__main__':
     strategy_labels = ["Defector", "Executor", "Cooperator"]
 
     fix, ax = plt.subplots(figsize=(8, 5))
-    # avg_rewards_fine = computeAvgReward()
-    # print(avg_rewards_fine)
     avg_def_reward_alphas, avg_exc_reward_alphas, avg_coop_reward_alphas= computeAvgReward()
     print(avg_coop_reward_alphas)
     plt.plot(np.arange(0, 1.01, 0.1), avg_def_reward_alphas,'*--', label='Fine of defectors')
