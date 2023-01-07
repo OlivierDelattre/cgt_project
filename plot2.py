@@ -79,7 +79,6 @@ if __name__ == '__main__':
                 mu=mu)
             beta = 5
             payoffs = game.calculate_payoffs()
-
             evolver = egt.analytical.StochDynamics(
                 3, 
                 np.array(payoffs), 
