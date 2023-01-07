@@ -22,7 +22,7 @@ def computeNIs():
                 risk=r,
                 alpha=alpha,
                 cooperation_threshold=M,
-                enhancement_factor=delta,
+                enhancement_factor=delta, #FOR PLOT 6B, delta = 3
                 pi_t=pi_t,
                 pi_e=pi_e,
                 n_e=n_e,

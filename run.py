@@ -166,15 +166,15 @@ class CRDWithExecutor():
                        / math.comb(self.Z - 1, self.N - 1)) * self.cooperator_flexible_incentives_payoff(jc + 1, je)
         return fc
 
-    def cooperator_average_reward_flexible(self):
-        rew = 0
-        id, ie, ic = int(self.id), int(self.ie), int(self.ic)
-        for jc in range(self.N):
-            for je in range(self.N - jc):
-                rew += ((math.comb(ic - 1, jc) * math.comb(ie, je) * math.comb(self.Z - ic - ie,
-                                                                               self.N - 1 - jc - je)) \
-                        / math.comb(self.Z - 1, self.N - 1)) * self.cooperator_flexible_incentives_payoff(jc + 1, je)
-        return rew
+    # def cooperator_average_reward_flexible(self):
+    #     rew = 0
+    #     id, ie, ic = int(self.id), int(self.ie), int(self.ic)
+    #     for jc in range(self.N):
+    #         for je in range(self.N - jc):
+    #             rew += ((math.comb(ic - 1, jc) * math.comb(ie, je) * math.comb(self.Z - ic - ie,
+    #                                                                            self.N - 1 - jc - je)) \
+    #                     / math.comb(self.Z - 1, self.N - 1)) * self.cooperator_flexible_incentives_payoff(jc + 1, je)
+    #     return rew
 
     def executor_average_payoffs_flexible(self):
         fe = 0
@@ -209,17 +209,21 @@ class CRDWithExecutor():
         nb_states_ = egt.calculate_nb_states(self.N, self.nb_strategies_)
         payoffs = np.zeros((self.nb_strategies_, nb_states_))
         ce_rewards_d_fines = np.zeros((self.nb_strategies_, nb_states_))
+        RI_D=0
+        RI_E=0
+        RI_C=0
         for i in range(nb_states_):
             group_composition = egt.sample_simplex(i, self.N, self.nb_strategies_)
             jc = group_composition[2]
             je = group_composition[1]
+            jd = group_composition[0]
             if self.incentive[1] == 'fixed':
                 PI_D = self.defector_fixed_incentives_payoff(jc, je)
                 PI_E = self.executor_fixed_incentives_payoff(jc, je)
                 PI_C = self.cooperator_fixed_incentives_payoff(jc, je)
-                RI_D = self.defector_fixed_incentives_reward(je)
-                RI_E = self.executor_fixed_incentives_reward(je)
-                RI_C = self.cooperator_fixed_incentives_reward(je)
+                RI_D = self.defector_fixed_incentives_reward(je)*jd
+                RI_E = self.executor_fixed_incentives_reward(je)*je
+                RI_C = self.cooperator_fixed_incentives_reward(je)*jc
             else:
                 # get rewards with flexible incentives
                 PI_D = self.defector_flexible_incentives_payoff(jc, je)
@@ -296,14 +300,21 @@ class CRDWithExecutor():
         total *= (1 / math.comb(self.Z, self.N))
         return total
 
-    def avg_reward(self, i):
+    def avg_rewards(self, i):
         self.set_population_state(i)
         rewards_coop = []
         rewards_exc = []
-        for jc in range(self.N + 1):
-            for je in range(self.N - jc + 1):
-                rewards.append(self.cooperator_fixed_incentives_reward(je))
-        return np.mean(rewards)
+        def_exc = []
+        cop_total=0
+        cop_avg=0
+        ic, ie = self.ic, self.ie
+        for jc in range(self.N + 1):#1
+            nb_je = self.N - jc + 1
+            for je in range(nb_je):#(range 4)je=0:3
+                cop = math.comb(ic, jc)*self.cooperator_fixed_incentives_reward(je)*jc
+                cop_total +=cop
+            cop_avg+=cop_total/(ic*nb_je)
+        return cop_avg
 
     def payoffs(self) -> np.ndarray:
         return self.payoffs_
@@ -379,7 +390,7 @@ if __name__ == '__main__':
     r = 0.2  # If minimum is not met: All group participants lose their endowment with probability r, else: individuals retain their endowments
     pi_t = 0.03
     pi_e = 0.3
-    n_e = 1.
+    n_e = 1. #ne=1, si je=1 alors delta =1 (punition) -> pas ok. Si je=2 alors punition -> ok car je>25% du group
     alpha = 0.
     mu = 1 / Z
     beta = 5.
